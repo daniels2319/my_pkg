@@ -11,25 +11,19 @@ import warnings
 warnings.simplefilter("ignore")
 # done
 
-def select_folder(instructions = "Select a folder", standard_directory = os.path.expanduser('~/Downloads')):
+def read_file(file_path):
     
-    # Create a hidden root window
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
+    # Load the file into a DataFrame
+    if file_path.endswith('.csv'):
+       df = pd.read_csv(file_path)
+    elif file_path.endswith(('.xls', '.xlsx')):
+       df = pd.read_excel(file_path)
     
-    # Open the file dialog and ask the user to select a file
-    folder_path = filedialog.askdirectory(initialdir = standard_directory, title = instructions)
-    
-    # Check if the user selected a file
-    if folder_path:
-        print(f"Selected folder: {folder_path}")
-    else:
-        print("No folder selected.")
+    return df
 
-
-# Let's the user select an Excel file. Downloads folder is the default one
 def select_file(instructions = "Select a file", standard_directory = os.path.expanduser('~/Downloads')):
-    
+# Let's the user select an Excel file. Downloads folder is the default one
+
     # Create a hidden root window
     root = tk.Tk()
     root.withdraw()  # Hide the main window
@@ -43,16 +37,10 @@ def select_file(instructions = "Select a file", standard_directory = os.path.exp
     else:
         print("No file selected.")
 
-    # Load the file into a DataFrame
-    if file_path.endswith('.csv'):
-        df = pd.read_csv(file_path)
-    elif file_path.endswith(('.xls', '.xlsx')):
-        df = pd.read_excel(file_path)
+    return read_file(file_path)
 
-    return df
-
-# Gets the latest file from the Downloads folder. CSV or XLSX
 def get_file(file_name):
+# Gets the latest file from the Downloads folder. csv or xlsx
 
     # Define the start of the filename you’re looking for
     filename_prefix = file_name
@@ -65,23 +53,17 @@ def get_file(file_name):
 
     # Ensure there's at least one match, and select the most recent if there are multiple
     if matching_files:
+        
         # If there are multiple files, you may want to sort them by modification time
         latest_file = max(matching_files, key=os.path.getmtime)
-        print(f"Latest file: {latest_file}")
-
-        # Load the file into a DataFrame
-        if latest_file.endswith('.csv'):
-            df = pd.read_csv(latest_file)
-        elif latest_file.endswith(('.xls', '.xlsx')):
-            df = pd.read_excel(latest_file)
-        
-        return df
+        print(f"Latest file: {latest_file}")      
+        return read_file(latest_file)
     
     else:
         print("No files found matching the specified prefix.")
 
-# Optimizes column headers for sql
 def sql_headers(df):
+# Optimizes column headers for sql
     
     replace_chars = str.maketrans({
             ' ': '_',
@@ -93,8 +75,9 @@ def sql_headers(df):
 
     return df
 
-# Saves the Pandas DataFrame in XLSX format
 def save_dataframe(
+# Saves the Pandas DataFrame in xlsx format
+
         dataframe, ask_location = False, standard_directory = os.path.expanduser('~/Downloads'), instructions = "Select the desired location to save the dataframe",
         *, format = "xlsx",
     ):
@@ -136,8 +119,26 @@ def save_dataframe(
     else:
         print("No file was selected to save the DataFrame.")
 
-# Create or replaces the folder based on title + today's date
+def select_folder(instructions = "Select a folder", standard_directory = os.path.expanduser('~/Downloads')):
+    
+    # Create a hidden root window
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    
+    # Open the file dialog and ask the user to select a file
+    folder_path = filedialog.askdirectory(initialdir = standard_directory, title = instructions)
+    
+    # Check if the user selected a file
+    if folder_path:
+        print(f"Selected folder: {folder_path}")
+    else:
+        print("No folder selected.")
+    
+    return folder_path
+
 def create_or_replace_folder(title):
+# Create or replaces the folder based on title + today's date
+
     today = datetime.today().strftime('%m-%d-%Y')
     folder_name = f"{title} {today}"
     
@@ -151,9 +152,9 @@ def create_or_replace_folder(title):
     
     return folder_name
 
+def slice_file_by_column(df, folder_name, *, column_to_slice_by, columns_to_remove = None):
 # Slices the Excel file based on a specific column
-def slice_excel_by_parent(df, folder_name, *, column_to_slice_by, columns_to_remove = None):
-    
+
     try:
         # Check if the slicing column exists
         if column_to_slice_by not in df.columns:
@@ -177,6 +178,26 @@ def slice_excel_by_parent(df, folder_name, *, column_to_slice_by, columns_to_rem
     
     return True
 
-# Tests below
+def compare_dataframes(df1, df2):
+# Function to compare DataFrames
+    
+    # Check if the number of columns is the same
+    same_column_count = df1.shape[1] == df2.shape[1]
+    
+    # Check if column names are the same
+    same_columns = set(df1.columns) == set(df2.columns)
+    
+    # Check if the number of rows is the same
+    same_row_count = df1.shape[0] == df2.shape[0]
+    
+    # Return results as a dictionary
+    return {
+        "same_column_count": same_column_count,
+        "same_columns": same_columns,
+        "same_row_count": same_row_count
+    }
 
-select_folder()
+
+# ------------------------- Tests below -------------------------
+
+# select_folder()
