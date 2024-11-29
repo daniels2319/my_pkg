@@ -11,6 +11,22 @@ import warnings
 warnings.simplefilter("ignore")
 # done
 
+def select_folder(instructions = "Select a folder", standard_directory = os.path.expanduser('~/Downloads')):
+    
+    # Create a hidden root window
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+    
+    # Open the file dialog and ask the user to select a file
+    folder_path = filedialog.askdirectory(initialdir = standard_directory, title = instructions)
+    
+    # Check if the user selected a file
+    if folder_path:
+        print(f"Selected folder: {folder_path}")
+    else:
+        print("No folder selected.")
+
+
 # Let's the user select an Excel file. Downloads folder is the default one
 def select_file(instructions = "Select a file", standard_directory = os.path.expanduser('~/Downloads')):
     
@@ -160,3 +176,7 @@ def slice_excel_by_parent(df, folder_name, *, column_to_slice_by, columns_to_rem
         return False
     
     return True
+
+# Tests below
+
+select_folder()
