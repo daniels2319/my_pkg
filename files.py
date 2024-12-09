@@ -190,14 +190,39 @@ def compare_dataframes(df1, df2):
     # Check if the number of rows is the same
     same_row_count = df1.shape[0] == df2.shape[0]
     
+    # Check if the values are the same
+    df1_sorted = df1.sort_values(by = list(df1.columns), ascending = True)
+    df1_sorted = df1_sorted.reset_index(drop = True)
+
+    df2_sorted = df2.sort_values(by = list(df2.columns), ascending = True)
+    df2_sorted = df2_sorted.reset_index(drop = True)
+    
+    try:
+        if df1_sorted.equals(df2_sorted):
+            same_values = True
+        else:
+            same_values = False
+    except:
+        same_values = False
+
     # Return results as a dictionary
     return {
+        #"file": file,
+        "old_report_columns_amount": df1.shape[1],
+        "new_report_columns_amount": df2.shape[1],
         "same_column_count": same_column_count,
         "same_columns": same_columns,
-        "same_row_count": same_row_count
+        "old_report_row_amount": df1.shape[0],
+        "new_report_row_amount": df2.shape[0],
+        "same_row_count": same_row_count,
+        "same_values": same_values
     }
 
 
 # ------------------------- Tests below -------------------------
 
-# select_folder()
+df1 = pd.read_excel("C:/Users/rockstar/Downloads/new Trad - Pearson Adoptions 2024-12-07T1218.xlsx")
+df2 = pd.read_excel("C:/Users/rockstar/Downloads/new Trad - Pearson Adoptions 2024-12-07T1218.xlsx")
+
+result = compare_dataframes(df1, df2)
+print(result)
