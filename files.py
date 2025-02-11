@@ -39,17 +39,14 @@ def select_file(instructions = "Select a file", standard_directory = os.path.exp
 
     return read_file(file_path)
 
-def get_file(file_name):
-# Gets the latest file from the Downloads folder. csv or xlsx
+def get_file(file_name, directory = os.path.expanduser('~/Downloads')):
+# Gets the latest file from a folder specified by the user. Downloads folder is the standard directory. csv or xlsx.
 
     # Define the start of the filename you’re looking for
     filename_prefix = file_name
 
-    # Path to the Downloads folder
-    downloads_path = os.path.expanduser('~/Downloads')
-
     # Search for files that start with 'filename_' in the downloads folder
-    matching_files = glob.glob(os.path.join(downloads_path, f"{filename_prefix}*"))
+    matching_files = glob.glob(os.path.join(directory, f"{filename_prefix}*"))
 
     # Ensure there's at least one match, and select the most recent if there are multiple
     if matching_files:
@@ -218,11 +215,40 @@ def compare_dataframes(df1, df2):
         "same_values": same_values
     }
 
+def combine_files_from_folder(folder_path):
+    """
+    Combines all Excel files that start with "Extract" from the specified folder into a single Pandas DataFrame.
+    
+    Parameters:
+        folder_path (str): The path to the folder containing the Excel files.
+        
+    Returns:
+        pd.DataFrame: A DataFrame containing the combined data from all matching Excel files.
+    """
+    all_files = [f for f in os.listdir(folder_path) if f.startswith("Extract") and f.endswith(('.xls', '.xlsx'))]
+    
+    dataframes = []
+    for file in all_files:
+        file_path = os.path.join(folder_path, file)
+        try:
+            df = pd.read_excel(file_path)
+            df["Source File"] = file  # Add a column to track the source file
+            dataframes.append(df)
+        except Exception as e:
+            print(f"Error reading {file}: {e}")
+    
+    if dataframes:
+        combined_df = pd.concat(dataframes, ignore_index=True)
+        return combined_df
+    else:
+        print("No matching Excel files found.")
+        return pd.DataFrame()
+
 
 # ------------------------- Tests below -------------------------
 
-df1 = pd.read_excel("C:/Users/rockstar/Downloads/new Trad - Pearson Adoptions 2024-12-07T1218.xlsx")
-df2 = pd.read_excel("C:/Users/rockstar/Downloads/new Trad - Pearson Adoptions 2024-12-07T1218.xlsx")
+# df1 = pd.read_csv("C:/Users/danie/Downloads/OLD Trad Items with Unverified Price 01022025.csv")
+# df2 = pd.read_csv("C:/Users/danie/Downloads/NEW Trad Items with Unverified Price 01022025.csv")
 
-result = compare_dataframes(df1, df2)
-print(result)
+# result = compare_dataframes(df1, df2)
+# print(result)
